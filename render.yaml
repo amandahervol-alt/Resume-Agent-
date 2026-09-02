@@ -2,7 +2,7 @@ services:
   - type: web
     name: resume-agent
     env: python
-    buildCommand: "pip install -r backend/requirements.txt"
+    buildCommand: "pip install -r requirements.txt"
     startCommand: "python app.py --port $PORT"
     envVars:
       - key: PYTHON_VERSION
