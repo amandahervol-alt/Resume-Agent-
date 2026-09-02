@@ -4,7 +4,6 @@ Resume Recommendation Agent — Standalone Server & CLI Launcher
 Launches the FastAPI backend and serves the interactive recommendation portal.
 """
 
-import os
 import sys
 import argparse
 import webbrowser
@@ -46,11 +45,11 @@ def main():
     args = parser.parse_args()
 
     # Validate imports
-    from main import app
-    import rules
-    import extraction
+    from main import app  # noqa: F401
+    import rules  # noqa: F401
+    import extraction  # noqa: F401
 
-    print(f"[OK] Backend successfully loaded (FastAPI + Rules Engine + Signal Extraction).")
+    print("[OK] Backend successfully loaded (FastAPI + Rules Engine + Signal Extraction).")
 
     if not args.no_serve:
         launch_server(port=args.port, open_browser=True)

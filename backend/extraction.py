@@ -20,6 +20,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+from typing import Any, Dict
+
 def get_model_name() -> str:
     return os.getenv("ANTHROPIC_MODEL", "claude-3-7-sonnet-20250219")
 
@@ -35,7 +37,7 @@ SYSTEM = (
 )
 
 # The tool schema mirrors the six signals the rules layer needs.
-RECORD_SIGNALS_TOOL = {
+RECORD_SIGNALS_TOOL: Dict[str, Any] = {
     "name": "record_signals",
     "description": "Record any visitor details learned so far. Only include fields you actually know.",
     "input_schema": {
@@ -80,13 +82,13 @@ def _converse_with_claude(history: list, known_signals: dict, api_key: str) -> d
     system = SYSTEM + "\n\n" + context
 
     messages = list(history)
-    new_signals = {}
+    new_signals: dict = {}
 
     response = client.messages.create(
         model=get_model_name(),
         max_tokens=600,
         system=system,
-        tools=[RECORD_SIGNALS_TOOL],
+        tools=[RECORD_SIGNALS_TOOL],  # type: ignore
         messages=messages,
     )
 
@@ -107,7 +109,7 @@ def _converse_with_claude(history: list, known_signals: dict, api_key: str) -> d
             model=get_model_name(),
             max_tokens=600,
             system=system,
-            tools=[RECORD_SIGNALS_TOOL],
+            tools=[RECORD_SIGNALS_TOOL],  # type: ignore
             messages=messages,
         )
 
@@ -119,7 +121,7 @@ def _converse_offline(history: list, known_signals: dict) -> dict:
     """Deterministic offline conversational extractor for local zero-config testing."""
     last_msg = history[-1]["content"] if history else ""
     last_lower = last_msg.lower()
-    new_signals = {}
+    new_signals: dict = {}
 
     # Extract budget ($XXX or numbers)
     budget_match = re.search(r"\$?(\d{2,4})", last_msg)
@@ -176,12 +178,18 @@ def _converse_offline(history: list, known_signals: dict) -> dict:
 
     # In single-shot tests or quick answers, supply sensible defaults for remaining unfilled signals
     if len(all_signals) >= 3:
-        if "timeline" not in all_signals: all_signals["timeline"] = "weeks"
-        if "prior_resume_work" not in all_signals: all_signals["prior_resume_work"] = "diy"
-        if "self_promotion_comfort" not in all_signals: all_signals["self_promotion_comfort"] = "medium"
-        if "budget" not in all_signals: all_signals["budget"] = 400
-        if "career_stage" not in all_signals: all_signals["career_stage"] = "senior"
-        if "target_roles" not in all_signals: all_signals["target_roles"] = "Senior Professional"
+        if "timeline" not in all_signals:
+            all_signals["timeline"] = "weeks"
+        if "prior_resume_work" not in all_signals:
+            all_signals["prior_resume_work"] = "diy"
+        if "self_promotion_comfort" not in all_signals:
+            all_signals["self_promotion_comfort"] = "medium"
+        if "budget" not in all_signals:
+            all_signals["budget"] = 400
+        if "career_stage" not in all_signals:
+            all_signals["career_stage"] = "senior"
+        if "target_roles" not in all_signals:
+            all_signals["target_roles"] = "Senior Professional"
         new_signals = all_signals
 
     # Generate friendly conversational reply
